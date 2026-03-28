@@ -1,6 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import { OAuthProvider } from "@lib/types/auth"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -15,14 +16,17 @@ import {
   setAuthToken,
 } from "./cookies"
 
-type OAuthProvider = "google" | "github"
-
 const toErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message
   }
 
   return "An unexpected error occurred."
+}
+
+type ResetPasswordResult = {
+  success: boolean
+  message: string
 }
 
 export const retrieveCustomer =
@@ -137,17 +141,14 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
-const loginWithOAuthProvider = async (
-  provider: OAuthProvider,
-  formData?: FormData
-) => {
-  const countryCode = (formData?.get("country_code") as string | null)?.trim()
-  const isValidCountryCode = Boolean(countryCode?.match(/^[a-z]{2}$/i))
+const loginWithOAuthProvider = async (provider: OAuthProvider) => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
-  const callbackUrl =
-    baseUrl && isValidCountryCode
-      ? `${baseUrl}/${countryCode}/account/oauth/${provider}/callback`
-      : undefined
+
+  if (!baseUrl) {
+    return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
+  }
+
+  const callbackUrl = `${baseUrl}/account/oauth/${provider}/callback`
 
   try {
     const result = await sdk.auth.login("customer", provider, {
@@ -175,16 +176,16 @@ const loginWithOAuthProvider = async (
 
 export async function loginWithGoogle(
   _currentState: unknown,
-  formData: FormData
+  _formData: FormData
 ) {
-  return loginWithOAuthProvider("google", formData)
+  return loginWithOAuthProvider("google")
 }
 
 export async function loginWithGithub(
   _currentState: unknown,
-  formData: FormData
+  _formData: FormData
 ) {
-  return loginWithOAuthProvider("github", formData)
+  return loginWithOAuthProvider("github")
 }
 
 export async function handleOAuthCallback(
@@ -217,7 +218,10 @@ export async function handleOAuthCallback(
     try {
       const refreshedToken = await sdk.auth.refresh()
       await setAuthToken(refreshedToken)
-    } catch {}
+    } catch {
+      // Token refresh can fail when provider/session doesn't issue a refreshable token.
+      // The callback token is already stored above, so login can still proceed safely.
+    }
 
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
@@ -233,11 +237,14 @@ export async function handleOAuthCallback(
 export async function requestPasswordReset(
   _currentState: unknown,
   formData: FormData
-) {
+): Promise<ResetPasswordResult> {
   const email = (formData.get("reset_email") as string | null)?.trim()
 
   if (!email) {
-    return "Please enter your email address."
+    return {
+      success: false,
+      message: "Please enter your email address.",
+    }
   }
 
   try {
@@ -245,9 +252,16 @@ export async function requestPasswordReset(
       identifier: email,
     })
 
-    return "If an account exists with this email, password reset instructions have been sent."
-  } catch (error) {
-    return toErrorMessage(error)
+    return {
+      success: true,
+      message:
+        "If an account exists with this email, password reset instructions have been sent.",
+    }
+  } catch {
+    return {
+      success: false,
+      message: "Unable to process password reset request. Please try again.",
+    }
   }
 }
 

@@ -1,8 +1,7 @@
 import { handleOAuthCallback } from "@lib/data/customer"
+import { OAuthProvider } from "@lib/types/auth"
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
-
-type OAuthProvider = "google" | "github"
 
 type Props = {
   params: Promise<{
@@ -42,4 +41,3 @@ export default async function OAuthCallbackPage({ params, searchParams }: Props)
 
   redirect(`/${countryCode}/account`)
 }
-
