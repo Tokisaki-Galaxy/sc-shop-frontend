@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Search, ShoppingCart, X } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
-const MainHeader = () => {
+const MainHeader = ({ totalItems = 0 }: { totalItems?: number }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   return (
@@ -62,7 +62,9 @@ const MainHeader = () => {
               className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-slate-700 transition-colors hover:text-slate-900"
             >
               <ShoppingCart className="h-5 w-5" />
-              <span className="text-sm font-medium whitespace-nowrap">0 Items</span>
+              <span className="text-sm font-medium whitespace-nowrap">
+                {totalItems} Items
+              </span>
             </LocalizedClientLink>
           </div>
         </div>
