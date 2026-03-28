@@ -437,3 +437,45 @@ export const updateCustomerAddress = async (
       return { success: false, error: err.toString() }
     })
 }
+
+type ConfirmPasswordResetResult = {
+  success: boolean
+  message: string
+}
+
+export async function confirmPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<ConfirmPasswordResetResult> {
+  const token = formData.get("token") as string
+  const password = formData.get("password") as string
+  const confirmPassword = formData.get("confirm_password") as string
+
+  if (!token) {
+    return { success: false, message: "Invalid or missing reset token." }
+  }
+
+  if (!password) {
+    return { success: false, message: "Please enter a new password." }
+  }
+
+  if (password.length < 8) {
+    return { success: false, message: "Password must be at least 8 characters." }
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, message: "Passwords do not match." }
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+
+    return { success: true, message: "Password updated successfully. You can now sign in." }
+  } catch (error) {
+    const message = toErrorMessage(error)
+    if (/expired|invalid.*token|token.*invalid/i.test(message)) {
+      return { success: false, message: "This reset link has expired or is invalid. Please request a new one." }
+    }
+    return { success: false, message: "Unable to update password. Please try again or request a new reset link." }
+  }
+}
