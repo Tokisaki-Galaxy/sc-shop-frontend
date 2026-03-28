@@ -4,17 +4,22 @@ type Params = {
   countryCode: string
 }
 
+const DEFAULT_VERIFICATION_PATH = "/verify-email"
+
 const getVerificationPath = () => {
   const configuredPath = process.env.STOREFRONT_EMAIL_VERIFICATION_PATH?.trim()
-  const path = configuredPath && configuredPath.length > 0 ? configuredPath : "/verify-email"
+  const path =
+    configuredPath && configuredPath.length > 0
+      ? configuredPath
+      : DEFAULT_VERIFICATION_PATH
   const normalizedPath = path.startsWith("/") ? path : `/${path}`
-  const withoutTrailingSlash = normalizedPath.replace(/\/+$/, "")
+  const trimmedPath = normalizedPath.replace(/\/+$/, "")
 
-  if (!withoutTrailingSlash || withoutTrailingSlash === "/") {
-    return "/verify-email"
+  if (!trimmedPath || trimmedPath === "/") {
+    return DEFAULT_VERIFICATION_PATH
   }
 
-  return withoutTrailingSlash
+  return trimmedPath
 }
 
 export async function GET(
