@@ -277,30 +277,51 @@ export async function handleOAuthCallback(
     const hasActorId = Boolean(decodedToken?.actor_id)
     const metadataEmail = decodedToken?.user_metadata?.email
 
+    let refreshHeaders: { authorization: string } | undefined = {
+      authorization: `Bearer ${token}`,
+    }
+
     if (!hasActorId) {
       if (!metadataEmail) {
         return "Unable to create customer for social login: missing email in provider profile."
       }
 
-      await sdk.store.customer.create(
-        {
-          email: metadataEmail,
-        },
-        {},
-        {
-          authorization: `Bearer ${token}`,
-        }
-      )
+      try {
+        await sdk.store.customer.create(
+          {
+            email: metadataEmail,
+          },
+          {},
+          {
+            authorization: `Bearer ${token}`,
+          }
+        )
+      } catch (error) {
+        return toErrorMessage(error)
+      }
+
+      // After customer creation, SDK-auth-managed token/session should already be set.
+      // Let refresh use SDK-managed auth first and fallback to callback token if needed.
+      refreshHeaders = undefined
     }
 
     try {
-      const refreshedToken = await sdk.auth.refresh({
-        authorization: `Bearer ${token}`,
-      })
+      const refreshedToken = refreshHeaders
+        ? await sdk.auth.refresh(refreshHeaders)
+        : await sdk.auth.refresh()
       await setAuthToken(refreshedToken)
     } catch {
-      // Token refresh can fail when provider/session doesn't issue a refreshable token.
-      // The callback token is already stored above, so login can still proceed safely.
+      if (!refreshHeaders) {
+        try {
+          const refreshedToken = await sdk.auth.refresh({
+            authorization: `Bearer ${token}`,
+          })
+          await setAuthToken(refreshedToken)
+        } catch {
+          // Token refresh can fail when provider/session doesn't issue a refreshable token.
+          // The callback token is already stored above, so login can still proceed safely.
+        }
+      }
     }
 
     const customerCacheTag = await getCacheTag("customers")
