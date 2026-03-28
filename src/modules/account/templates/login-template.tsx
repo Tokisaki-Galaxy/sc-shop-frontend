@@ -14,7 +14,7 @@ export enum LOGIN_VIEW {
 const LoginTemplate = () => {
   const searchParams = useSearchParams()
   const view = searchParams.get("view")
-  const initialView = view === LOGIN_VIEW.REGISTER ? LOGIN_VIEW.REGISTER : LOGIN_VIEW.SIGN_IN
+  const initialView = view === LOGIN_VIEW.REGISTER ? view : LOGIN_VIEW.SIGN_IN
   const [currentView, setCurrentView] = useState(initialView)
 
   return (
