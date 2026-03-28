@@ -29,7 +29,10 @@ const isProviderMissingError = (error: unknown) => {
     return false
   }
 
-  return error.message.includes("Unable to retrieve the auth provider with id")
+  const maybeError = error as Error & { status?: unknown }
+  const hasAuthProviderMessage = /auth provider with id/i.test(error.message)
+
+  return hasAuthProviderMessage && maybeError.status === 401
 }
 
 const isNextRedirectError = (error: unknown) => {
@@ -132,7 +135,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     return createdCustomer
   } catch (error: any) {
     if (isProviderMissingError(error)) {
-      return "Email/password sign-up is unavailable on this backend. Please use Google or GitHub sign-in."
+      return "Email/password sign-up is unavailable on this backend. Please use an available social sign-in option."
     }
 
     return error.toString()
@@ -153,7 +156,7 @@ export async function login(_currentState: unknown, formData: FormData) {
       })
   } catch (error: any) {
     if (isProviderMissingError(error)) {
-      return "Email/password sign-in is unavailable on this backend. Please use Google or GitHub sign-in."
+      return "Email/password sign-in is unavailable on this backend. Please use an available social sign-in option."
     }
 
     return error.toString()
