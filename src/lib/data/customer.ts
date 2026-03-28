@@ -24,6 +24,30 @@ const toErrorMessage = (error: unknown) => {
   return "An unexpected error occurred."
 }
 
+type DecodedAuthToken = {
+  actor_id?: string
+  user_metadata?: {
+    email?: string
+  }
+}
+
+const decodeJwtPayload = (token: string): DecodedAuthToken | null => {
+  const parts = token.split(".")
+
+  if (parts.length < 2) {
+    return null
+  }
+
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/")
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=")
+    const payload = Buffer.from(padded, "base64").toString("utf-8")
+    return JSON.parse(payload) as DecodedAuthToken
+  } catch {
+    return null
+  }
+}
+
 const isProviderMissingError = (error: unknown) => {
   if (!(error instanceof Error)) {
     return false
@@ -238,18 +262,66 @@ export async function handleOAuthCallback(
   }
 
   try {
-    const token = await sdk.auth.callback("customer", provider, {
+    const callbackResult = await sdk.auth.callback("customer", provider, {
       ...callbackParams,
     })
 
+    if (typeof callbackResult !== "string" || !callbackResult) {
+      return "Invalid authentication token returned from provider."
+    }
+
+    const token = callbackResult
     await setAuthToken(token)
 
+    const decodedToken = decodeJwtPayload(token)
+    const hasActorId = Boolean(decodedToken?.actor_id)
+    const metadataEmail = decodedToken?.user_metadata?.email
+
+    let refreshHeaders: { authorization: string } | undefined = {
+      authorization: `Bearer ${token}`,
+    }
+
+    if (!hasActorId) {
+      if (!metadataEmail) {
+        return "Unable to create customer for social login: missing email in provider profile."
+      }
+
+      try {
+        await sdk.store.customer.create(
+          {
+            email: metadataEmail,
+          },
+          {},
+          {
+            authorization: `Bearer ${token}`,
+          }
+        )
+      } catch (error) {
+        return toErrorMessage(error)
+      }
+
+      // After customer creation, SDK-auth-managed token/session should already be set.
+      // Let refresh use SDK-managed auth first and fallback to callback token if needed.
+      refreshHeaders = undefined
+    }
+
     try {
-      const refreshedToken = await sdk.auth.refresh()
+      const refreshedToken = refreshHeaders
+        ? await sdk.auth.refresh(refreshHeaders)
+        : await sdk.auth.refresh()
       await setAuthToken(refreshedToken)
     } catch {
-      // Token refresh can fail when provider/session doesn't issue a refreshable token.
-      // The callback token is already stored above, so login can still proceed safely.
+      if (!refreshHeaders) {
+        try {
+          const refreshedToken = await sdk.auth.refresh({
+            authorization: `Bearer ${token}`,
+          })
+          await setAuthToken(refreshedToken)
+        } catch {
+          // Token refresh can fail when provider/session doesn't issue a refreshable token.
+          // The callback token is already stored above, so login can still proceed safely.
+        }
+      }
     }
 
     const customerCacheTag = await getCacheTag("customers")
