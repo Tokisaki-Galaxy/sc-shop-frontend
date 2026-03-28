@@ -2,6 +2,10 @@
 
 import { sdk } from "@lib/config"
 import { OAuthProvider } from "@lib/types/auth"
+import {
+  mapOAuthCallbackErrorMessage,
+  sanitizeOAuthCallbackParams,
+} from "@lib/util/oauth-callback"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -277,12 +281,15 @@ export async function handleOAuthCallback(
   provider: OAuthProvider,
   callbackParams: Record<string, string>
 ) {
-  const sanitizedCallbackParams = callbackParams
+  const sanitizedCallbackParams = sanitizeOAuthCallbackParams(
+    provider,
+    callbackParams
+  )
   const callbackError =
     sanitizedCallbackParams.error_description || sanitizedCallbackParams.error
 
   if (callbackError) {
-    return callbackError
+    return mapOAuthCallbackErrorMessage(provider, callbackError)
   }
 
   if (!sanitizedCallbackParams.code) {
@@ -359,7 +366,7 @@ export async function handleOAuthCallback(
 
     return null
   } catch (error) {
-    return toErrorMessage(error)
+    return mapOAuthCallbackErrorMessage(provider, toErrorMessage(error))
   }
 }
 
