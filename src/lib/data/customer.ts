@@ -2,10 +2,6 @@
 
 import { sdk } from "@lib/config"
 import { OAuthProvider } from "@lib/types/auth"
-import {
-  mapOAuthCallbackErrorMessage,
-  sanitizeOAuthCallbackParams,
-} from "@lib/util/oauth-callback"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -244,26 +240,16 @@ export async function loginWithGoogle(
   return loginWithOAuthProvider("google")
 }
 
-export async function loginWithGithub(
-  _currentState: unknown,
-  _formData: FormData
-) {
-  return loginWithOAuthProvider("github")
-}
-
 export async function handleOAuthCallback(
   provider: OAuthProvider,
   callbackParams: Record<string, string>
 ) {
-  const sanitizedCallbackParams = sanitizeOAuthCallbackParams(
-    provider,
-    callbackParams
-  )
+  const sanitizedCallbackParams = callbackParams
   const callbackError =
     sanitizedCallbackParams.error_description || sanitizedCallbackParams.error
 
   if (callbackError) {
-    return mapOAuthCallbackErrorMessage(provider, callbackError)
+    return callbackError
   }
 
   if (!sanitizedCallbackParams.code) {
@@ -340,7 +326,7 @@ export async function handleOAuthCallback(
 
     return null
   } catch (error) {
-    return mapOAuthCallbackErrorMessage(provider, toErrorMessage(error))
+    return toErrorMessage(error)
   }
 }
 
