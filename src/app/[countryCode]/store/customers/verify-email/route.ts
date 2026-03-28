@@ -4,12 +4,23 @@ type Params = {
   countryCode: string
 }
 
+const getVerificationPath = () => {
+  const configuredPath = process.env.STOREFRONT_EMAIL_VERIFICATION_PATH?.trim()
+  const path = configuredPath && configuredPath.length > 0 ? configuredPath : "/verify-email"
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+
+  return normalizedPath.replace(/\/+$/, "") || "/verify-email"
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<Params> }
 ) {
   const { countryCode } = await context.params
-  const redirectUrl = new URL(`/${countryCode}/verify-email`, request.url)
+  const redirectUrl = new URL(
+    `/${countryCode}${getVerificationPath()}`,
+    request.url
+  )
 
   request.nextUrl.searchParams.forEach((value, key) => {
     redirectUrl.searchParams.set(key, value)
