@@ -24,6 +24,23 @@ const toErrorMessage = (error: unknown) => {
   return "An unexpected error occurred."
 }
 
+const isProviderMissingError = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  return error.message.includes("Unable to retrieve the auth provider with id")
+}
+
+const isNextRedirectError = (error: unknown) => {
+  if (!error || typeof error !== "object" || !("digest" in error)) {
+    return false
+  }
+
+  const digest = (error as { digest?: unknown }).digest
+  return typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")
+}
+
 type ResetPasswordResult = {
   success: boolean
   message: string
@@ -114,6 +131,10 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
+    if (isProviderMissingError(error)) {
+      return "Email/password sign-up is unavailable on this backend. Please use Google or GitHub sign-in."
+    }
+
     return error.toString()
   }
 }
@@ -131,6 +152,10 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag(customerCacheTag)
       })
   } catch (error: any) {
+    if (isProviderMissingError(error)) {
+      return "Email/password sign-in is unavailable on this backend. Please use Google or GitHub sign-in."
+    }
+
     return error.toString()
   }
 
@@ -170,6 +195,10 @@ const loginWithOAuthProvider = async (provider: OAuthProvider) => {
 
     return "Unable to start social login."
   } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error
+    }
+
     return toErrorMessage(error)
   }
 }
@@ -257,7 +286,15 @@ export async function requestPasswordReset(
       message:
         "If an account exists with this email, password reset instructions have been sent.",
     }
-  } catch {
+  } catch (error) {
+    if (isProviderMissingError(error)) {
+      return {
+        success: false,
+        message:
+          "Password reset is unavailable because email/password auth is not enabled on this backend.",
+      }
+    }
+
     return {
       success: false,
       message: "Unable to process password reset request. Please try again.",
