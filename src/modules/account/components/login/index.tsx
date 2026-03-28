@@ -10,14 +10,12 @@ import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import { useActionState } from "react"
 import { useSearchParams } from "next/navigation"
-import { useParams } from "next/navigation"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
 }
 
 const Login = ({ setCurrentView }: Props) => {
-  const { countryCode } = useParams() as { countryCode: string }
   const searchParams = useSearchParams()
   const oauthError = searchParams.get("error")
 
@@ -65,7 +63,6 @@ const Login = ({ setCurrentView }: Props) => {
       </form>
       <div className="w-full mt-4 flex flex-col gap-y-2">
         <form action={googleLoginAction}>
-          <input type="hidden" name="country_code" value={countryCode} />
           <SubmitButton
             type="submit"
             data-testid="google-sso-button"
@@ -76,7 +73,6 @@ const Login = ({ setCurrentView }: Props) => {
           </SubmitButton>
         </form>
         <form action={githubLoginAction}>
-          <input type="hidden" name="country_code" value={countryCode} />
           <SubmitButton
             type="submit"
             data-testid="github-sso-button"
