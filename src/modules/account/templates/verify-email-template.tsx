@@ -53,10 +53,10 @@ const VerifyEmailTemplate = ({ token, email }: Props) => {
       <div className="max-w-sm w-full flex flex-col items-center">
         <h1 className="text-large-semi uppercase mb-6">
           {state.loading
-            ? "Verifying Email"
+            ? "验证邮箱中"
             : state.success
-              ? "Email Verified"
-              : "Verification Failed"}
+              ? "邮箱验证成功"
+              : "邮箱验证失败"}
         </h1>
         <p
           className={`text-center text-base-regular mb-8 ${

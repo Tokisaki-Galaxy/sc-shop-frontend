@@ -56,9 +56,7 @@ const Login = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage
           error={
-            typeof message === "string"
-              ? message.replace(/^Error:\s*/i, "")
-              : null
+            typeof message === "string" ? message : null
           }
           data-testid="login-error-message"
         />

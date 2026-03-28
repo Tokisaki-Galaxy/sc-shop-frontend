@@ -41,7 +41,7 @@ const toErrorMessage = (error: unknown) => {
   }
 
   if (error instanceof Error) {
-    return error.message.replace(/^Error:\s*/i, "").trim()
+    return (typeof error.message === "string" ? error.message : "").trim()
   }
 
   return "An unexpected error occurred."
@@ -100,6 +100,9 @@ type SignupResult = {
   success: boolean
   message?: string
 }
+
+export const SIGNUP_VERIFY_EMAIL_MESSAGE =
+  "注册成功，请去邮箱点击确认链接后再登录。"
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -172,6 +175,8 @@ export async function signup(_currentState: unknown, formData: FormData) {
       headers
     )
 
+    // Email verification is required before sign-in, so we clear auth state
+    // and wait for explicit login after verification.
     await removeAuthToken()
 
     const customerCacheTag = await getCacheTag("customers")
@@ -179,7 +184,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return {
       success: true,
-      message: "注册成功，请去邮箱点击确认链接后再登录。",
+      message: SIGNUP_VERIFY_EMAIL_MESSAGE,
     } as SignupResult
   } catch (error: any) {
     if (isProviderMissingError(error)) {
@@ -433,17 +438,29 @@ export async function verifyEmailToken(
   }
 
   try {
-    const result = await sdk.client.fetch<{ message?: string }>(
-      `/store/customers/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`,
+    const result = await sdk.client.fetch<unknown>(
+      "/store/customers/verify-email",
       {
-        method: "GET",
+        method: "POST",
+        body: {
+          token,
+          email,
+        },
         cache: "no-store",
       }
     )
 
+    const message =
+      result &&
+      typeof result === "object" &&
+      "message" in result &&
+      typeof result.message === "string"
+        ? result.message
+        : null
+
     return {
       success: true,
-      message: result?.message || "邮箱验证成功，现在可以登录了。",
+      message: message || "邮箱验证成功，现在可以登录了。",
     }
   } catch (error) {
     return {

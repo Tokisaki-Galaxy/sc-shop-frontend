@@ -6,7 +6,7 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { signup } from "@lib/data/customer"
+import { signup, SIGNUP_VERIFY_EMAIL_MESSAGE } from "@lib/data/customer"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -14,16 +14,18 @@ type Props = {
 
 const Register = ({ setCurrentView }: Props) => {
   const [state, formAction] = useActionState(signup, null)
-  const errorMessage =
-    state && typeof state === "object" && "success" in state && !state.success
-      ? state.message || "注册失败，请稍后重试。"
-      : typeof state === "string"
-        ? state
-        : null
-  const successMessage =
-    state && typeof state === "object" && "success" in state && state.success
-      ? state.message || "注册成功，请去邮箱点击确认链接后再登录。"
-      : null
+  let errorMessage: string | null = null
+  let successMessage: string | null = null
+
+  if (state && typeof state === "object" && "success" in state) {
+    if (state.success) {
+      successMessage = state.message || SIGNUP_VERIFY_EMAIL_MESSAGE
+    } else {
+      errorMessage = state.message || "注册失败，请稍后重试。"
+    }
+  } else if (typeof state === "string") {
+    errorMessage = state
+  }
 
   return (
     <div
@@ -79,7 +81,12 @@ const Register = ({ setCurrentView }: Props) => {
         </div>
         <ErrorMessage error={errorMessage} data-testid="register-error" />
         {successMessage && (
-          <p className="pt-2 text-emerald-600 text-small-regular" data-testid="register-success">
+          <p
+            className="pt-2 text-emerald-600 text-small-regular"
+            data-testid="register-success"
+            role="status"
+            aria-live="polite"
+          >
             {successMessage}
           </p>
         )}
