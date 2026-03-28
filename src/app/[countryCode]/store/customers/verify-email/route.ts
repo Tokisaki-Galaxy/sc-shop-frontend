@@ -15,5 +15,5 @@ export async function GET(
     redirectUrl.searchParams.set(key, value)
   })
 
-  return NextResponse.redirect(redirectUrl)
+  return NextResponse.redirect(redirectUrl, 307)
 }
