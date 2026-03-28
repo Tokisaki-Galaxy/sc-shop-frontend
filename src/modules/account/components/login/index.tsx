@@ -1,16 +1,31 @@
-import { login } from "@lib/data/customer"
+import {
+  login,
+  loginWithGithub,
+  loginWithGoogle,
+  requestPasswordReset,
+} from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import { useActionState } from "react"
+import { useSearchParams } from "next/navigation"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
 }
 
 const Login = ({ setCurrentView }: Props) => {
+  const searchParams = useSearchParams()
+  const oauthError = searchParams.get("error")
+
   const [message, formAction] = useActionState(login, null)
+  const [googleMessage, googleLoginAction] = useActionState(loginWithGoogle, null)
+  const [githubMessage, githubLoginAction] = useActionState(loginWithGithub, null)
+  const [resetState, resetFormAction] = useActionState(requestPasswordReset, null)
+  const ssoErrors = [oauthError, googleMessage, githubMessage]
+    .filter(Boolean)
+    .join(" | ")
 
   return (
     <div
@@ -45,6 +60,66 @@ const Login = ({ setCurrentView }: Props) => {
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
           Sign in
         </SubmitButton>
+      </form>
+      <div className="w-full mt-4 flex flex-col gap-y-2">
+        <form action={googleLoginAction}>
+          <SubmitButton
+            type="submit"
+            data-testid="google-sso-button"
+            className="w-full"
+            variant="secondary"
+          >
+            Continue with Google
+          </SubmitButton>
+        </form>
+        <form action={githubLoginAction}>
+          <SubmitButton
+            type="submit"
+            data-testid="github-sso-button"
+            className="w-full"
+            variant="secondary"
+          >
+            Continue with GitHub
+          </SubmitButton>
+        </form>
+      </div>
+      <ErrorMessage
+        error={ssoErrors || null}
+        data-testid="sso-login-error-message"
+      />
+      <form className="w-full mt-4" action={resetFormAction}>
+        <h2 className="text-base-semi mb-2 text-ui-fg-base">Forgot password?</h2>
+        <div className="flex flex-col w-full gap-y-2">
+          <Input
+            label="Reset password email"
+            name="reset_email"
+            type="email"
+            autoComplete="email"
+            required
+            data-testid="reset-password-email-input"
+          />
+        </div>
+        <SubmitButton
+          type="submit"
+          data-testid="reset-password-button"
+          className="w-full mt-3"
+          variant="secondary"
+        >
+          Reset password
+        </SubmitButton>
+        {resetState?.success === false ? (
+          <ErrorMessage
+            error={resetState.message}
+            data-testid="reset-password-error-message"
+          />
+        ) : (
+          <p
+            className="text-center text-ui-fg-base text-small-regular mt-2"
+            data-testid="reset-password-message"
+          >
+            {resetState?.message}
+          </p>
+        )}
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
         Not a member?{" "}
