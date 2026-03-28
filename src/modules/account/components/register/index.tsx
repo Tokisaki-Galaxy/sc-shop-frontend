@@ -6,7 +6,7 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { signup, SIGNUP_VERIFY_EMAIL_MESSAGE } from "@lib/data/customer"
+import { signup } from "@lib/data/customer"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -16,10 +16,11 @@ const Register = ({ setCurrentView }: Props) => {
   const [state, formAction] = useActionState(signup, null)
   let errorMessage: string | null = null
   let successMessage: string | null = null
+  const registerSuccessMessage = "注册成功，请去邮箱点击确认链接后再登录。"
 
   if (state && typeof state === "object" && "success" in state) {
     if (state.success) {
-      successMessage = state.message || SIGNUP_VERIFY_EMAIL_MESSAGE
+      successMessage = state.message || registerSuccessMessage
     } else {
       errorMessage = state.message || "注册失败，请稍后重试。"
     }

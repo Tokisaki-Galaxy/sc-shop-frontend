@@ -101,9 +101,6 @@ type SignupResult = {
   message?: string
 }
 
-export const SIGNUP_VERIFY_EMAIL_MESSAGE =
-  "注册成功，请去邮箱点击确认链接后再登录。"
-
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
@@ -184,7 +181,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return {
       success: true,
-      message: SIGNUP_VERIFY_EMAIL_MESSAGE,
+      message: "注册成功，请去邮箱点击确认链接后再登录。",
     } as SignupResult
   } catch (error: any) {
     if (isProviderMissingError(error)) {
