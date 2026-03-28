@@ -20,6 +20,19 @@ test("should keep only whitelisted callback params for github", () => {
   })
 })
 
+test("should drop github callback params with blank values", () => {
+  const sanitized = sanitizeOAuthCallbackParams("github", {
+    code: "abc",
+    state: "   ",
+    error_description: "   ",
+    error: "",
+  })
+
+  assert.deepEqual(sanitized, {
+    code: "abc",
+  })
+})
+
 test("should not sanitize callback params for non-github providers", () => {
   const params = {
     code: "abc",
@@ -38,10 +51,9 @@ test("should map invalid time value error for github", () => {
     "SSO login failed: Invalid time value"
   )
 
-  assert.ok(
-    mapped.includes(
-      "GitHub SSO login failed due to backend token expiry parsing"
-    )
+  assert.equal(
+    mapped,
+    "GitHub SSO login failed. Please try again or contact support if the issue persists."
   )
 })
 

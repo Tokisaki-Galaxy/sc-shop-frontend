@@ -34,7 +34,7 @@ export const mapOAuthCallbackErrorMessage = (
   }
 
   if (/invalid time value/i.test(message)) {
-    return "GitHub SSO login failed due to backend token expiry parsing. Please contact support to update the GitHub auth provider configuration."
+    return "GitHub SSO login failed. Please try again or contact support if the issue persists."
   }
 
   return message
