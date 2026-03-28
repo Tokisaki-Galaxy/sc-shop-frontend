@@ -225,7 +225,7 @@ export async function loginWithGithub(
 
 export async function handleOAuthCallback(
   provider: OAuthProvider,
-  callbackParams: Record<string, string | undefined>
+  callbackParams: Record<string, string>
 ) {
   const callbackError = callbackParams.error_description || callbackParams.error
 
@@ -238,12 +238,8 @@ export async function handleOAuthCallback(
   }
 
   try {
-    const query = Object.fromEntries(
-      Object.entries(callbackParams).filter(([, value]) => value !== undefined)
-    )
-
     const token = await sdk.auth.callback("customer", provider, {
-      ...query,
+      ...callbackParams,
     })
 
     await setAuthToken(token)
