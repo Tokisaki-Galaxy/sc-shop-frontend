@@ -25,22 +25,29 @@ jobs:
           repository: tokisaki-galaxy/sc-shop-backend
           path: sc-shop-backend
           fetch-depth: 1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+          run_install: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: ${{ (hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != '') && 'npm' || '' }}
+          cache: "pnpm"
 
       - name: Install System Utilities
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq xvfb tree ripgrep
+          sudo apt-get install -y jq xvfb tree ripgrep git
 
       - name: Install dependencies
         run: |
-          if [ -f package.json ]; then
-            npm ci || npm install
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f package.json ]; then
+            pnpm install
           else
             echo "No package.json found, skipping dependency installation."
           fi
@@ -51,11 +58,16 @@ jobs:
             echo "No package.json found, skipping all JS-related checks."
             exit 0
           fi
-          # 检查是否存在相应配置文件，避免无配置报错
-          npx tsc -b || echo "No tsconfig found, skipping tsc"
-          npm run lint || echo "No lint script found, skipping lint"
-          # Prettier 通常可以直接运行
-          npx prettier --check . || echo "Prettier check failed or no files to check"
-          npx vitest run --coverage.enabled=false || echo "No tests found, skipping vitest"
-          # 检查未使用代码
-          npx knip || echo "Knip check skipped"
+
+          # 检查是否存在相应脚本或配置文件
+          pnpm exec tsc -b || echo "No tsconfig found, skipping tsc"
+          pnpm run lint || echo "No lint script found, skipping lint"
+
+          # Prettier
+          pnpm exec prettier --check . || echo "Prettier check failed or no files to check"
+
+          # Vitest
+          pnpm exec vitest run --coverage.enabled=false || echo "No tests found, skipping vitest"
+
+          # Knip
+          pnpm exec knip || echo "Knip check skipped"
