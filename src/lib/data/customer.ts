@@ -1,6 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import { OAuthProvider } from "@lib/types/auth"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
@@ -14,6 +15,19 @@ import {
   removeCartId,
   setAuthToken,
 } from "./cookies"
+
+const toErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return "An unexpected error occurred."
+}
+
+type ResetPasswordResult = {
+  success: boolean
+  message: string
+}
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -124,6 +138,130 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     return error.toString()
+  }
+}
+
+const loginWithOAuthProvider = async (provider: OAuthProvider) => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
+
+  if (!baseUrl) {
+    return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
+  }
+
+  const callbackUrl = `${baseUrl}/account/oauth/${provider}/callback`
+
+  try {
+    const result = await sdk.auth.login("customer", provider, {
+      ...(callbackUrl ? { callback_url: callbackUrl } : {}),
+    })
+
+    if (typeof result === "object" && result && "location" in result) {
+      redirect(result.location as string)
+    }
+
+    if (typeof result === "string") {
+      await setAuthToken(result)
+      const customerCacheTag = await getCacheTag("customers")
+      revalidateTag(customerCacheTag)
+      await transferCart()
+
+      return null
+    }
+
+    return "Unable to start social login."
+  } catch (error) {
+    return toErrorMessage(error)
+  }
+}
+
+export async function loginWithGoogle(
+  _currentState: unknown,
+  _formData: FormData
+) {
+  return loginWithOAuthProvider("google")
+}
+
+export async function loginWithGithub(
+  _currentState: unknown,
+  _formData: FormData
+) {
+  return loginWithOAuthProvider("github")
+}
+
+export async function handleOAuthCallback(
+  provider: OAuthProvider,
+  callbackParams: {
+    code?: string
+    state?: string
+    error?: string
+    error_description?: string
+  }
+) {
+  const callbackError = callbackParams.error_description || callbackParams.error
+
+  if (callbackError) {
+    return callbackError
+  }
+
+  if (!callbackParams.code) {
+    return "Missing OAuth callback code."
+  }
+
+  try {
+    const token = await sdk.auth.callback("customer", provider, {
+      code: callbackParams.code,
+      ...(callbackParams.state ? { state: callbackParams.state } : {}),
+    })
+
+    await setAuthToken(token)
+
+    try {
+      const refreshedToken = await sdk.auth.refresh()
+      await setAuthToken(refreshedToken)
+    } catch {
+      // Token refresh can fail when provider/session doesn't issue a refreshable token.
+      // The callback token is already stored above, so login can still proceed safely.
+    }
+
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    await transferCart()
+
+    return null
+  } catch (error) {
+    return toErrorMessage(error)
+  }
+}
+
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<ResetPasswordResult> {
+  const email = (formData.get("reset_email") as string | null)?.trim()
+
+  if (!email) {
+    return {
+      success: false,
+      message: "Please enter your email address.",
+    }
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+
+    return {
+      success: true,
+      message:
+        "If an account exists with this email, password reset instructions have been sent.",
+    }
+  } catch {
+    return {
+      success: false,
+      message: "Unable to process password reset request. Please try again.",
+    }
   }
 }
 
