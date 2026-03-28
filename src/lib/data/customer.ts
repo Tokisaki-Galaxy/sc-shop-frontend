@@ -169,14 +169,21 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
-const loginWithOAuthProvider = async (provider: OAuthProvider) => {
+const loginWithOAuthProvider = async (
+  provider: OAuthProvider,
+  countryCode?: string
+) => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
 
   if (!baseUrl) {
     return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
   }
 
-  const callbackUrl = `${baseUrl}/account/oauth/${provider}/callback`
+  const normalizedCountryCode = countryCode?.trim().toLowerCase()
+  const callbackPath = normalizedCountryCode
+    ? `/${normalizedCountryCode}/account/oauth/${provider}/callback`
+    : `/account/oauth/${provider}/callback`
+  const callbackUrl = `${baseUrl}${callbackPath}`
 
   try {
     const result = await sdk.auth.login("customer", provider, {
@@ -208,16 +215,18 @@ const loginWithOAuthProvider = async (provider: OAuthProvider) => {
 
 export async function loginWithGoogle(
   _currentState: unknown,
-  _formData: FormData
+  formData: FormData
 ) {
-  return loginWithOAuthProvider("google")
+  const countryCode = formData.get("country_code") as string | null
+  return loginWithOAuthProvider("google", countryCode ?? undefined)
 }
 
 export async function loginWithGithub(
   _currentState: unknown,
-  _formData: FormData
+  formData: FormData
 ) {
-  return loginWithOAuthProvider("github")
+  const countryCode = formData.get("country_code") as string | null
+  return loginWithOAuthProvider("github", countryCode ?? undefined)
 }
 
 export async function handleOAuthCallback(
@@ -436,4 +445,46 @@ export const updateCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+type ConfirmPasswordResetResult = {
+  success: boolean
+  message: string
+}
+
+export async function confirmPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<ConfirmPasswordResetResult> {
+  const token = formData.get("token") as string
+  const password = formData.get("password") as string
+  const confirmPassword = formData.get("confirm_password") as string
+
+  if (!token) {
+    return { success: false, message: "Invalid or missing reset token." }
+  }
+
+  if (!password) {
+    return { success: false, message: "Please enter a new password." }
+  }
+
+  if (password.length < 8) {
+    return { success: false, message: "Password must be at least 8 characters." }
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, message: "Passwords do not match." }
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+
+    return { success: true, message: "Password updated successfully. You can now sign in." }
+  } catch (error) {
+    const message = toErrorMessage(error)
+    if (/expired|invalid.*token|token.*invalid/i.test(message)) {
+      return { success: false, message: "This reset link has expired or is invalid. Please request a new one." }
+    }
+    return { success: false, message: "Unable to update password. Please try again or request a new reset link." }
+  }
 }
