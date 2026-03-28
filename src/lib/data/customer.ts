@@ -15,6 +15,16 @@ import {
   setAuthToken,
 } from "./cookies"
 
+type OAuthProvider = "google" | "github"
+
+const toErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return "An unexpected error occurred."
+}
+
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
     const authHeaders = await getAuthHeaders()
@@ -124,6 +134,120 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     return error.toString()
+  }
+}
+
+const loginWithOAuthProvider = async (
+  provider: OAuthProvider,
+  formData?: FormData
+) => {
+  const countryCode = (formData?.get("country_code") as string | null)?.trim()
+  const isValidCountryCode = Boolean(countryCode?.match(/^[a-z]{2}$/i))
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
+  const callbackUrl =
+    baseUrl && isValidCountryCode
+      ? `${baseUrl}/${countryCode}/account/oauth/${provider}/callback`
+      : undefined
+
+  try {
+    const result = await sdk.auth.login("customer", provider, {
+      ...(callbackUrl ? { callback_url: callbackUrl } : {}),
+    })
+
+    if (typeof result === "object" && result && "location" in result) {
+      redirect(result.location as string)
+    }
+
+    if (typeof result === "string") {
+      await setAuthToken(result)
+      const customerCacheTag = await getCacheTag("customers")
+      revalidateTag(customerCacheTag)
+      await transferCart()
+
+      return null
+    }
+
+    return "Unable to start social login."
+  } catch (error) {
+    return toErrorMessage(error)
+  }
+}
+
+export async function loginWithGoogle(
+  _currentState: unknown,
+  formData: FormData
+) {
+  return loginWithOAuthProvider("google", formData)
+}
+
+export async function loginWithGithub(
+  _currentState: unknown,
+  formData: FormData
+) {
+  return loginWithOAuthProvider("github", formData)
+}
+
+export async function handleOAuthCallback(
+  provider: OAuthProvider,
+  callbackParams: {
+    code?: string
+    state?: string
+    error?: string
+    error_description?: string
+  }
+) {
+  const callbackError = callbackParams.error_description || callbackParams.error
+
+  if (callbackError) {
+    return callbackError
+  }
+
+  if (!callbackParams.code) {
+    return "Missing OAuth callback code."
+  }
+
+  try {
+    const token = await sdk.auth.callback("customer", provider, {
+      code: callbackParams.code,
+      ...(callbackParams.state ? { state: callbackParams.state } : {}),
+    })
+
+    await setAuthToken(token)
+
+    try {
+      const refreshedToken = await sdk.auth.refresh()
+      await setAuthToken(refreshedToken)
+    } catch {}
+
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    await transferCart()
+
+    return null
+  } catch (error) {
+    return toErrorMessage(error)
+  }
+}
+
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = (formData.get("reset_email") as string | null)?.trim()
+
+  if (!email) {
+    return "Please enter your email address."
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+
+    return "If an account exists with this email, password reset instructions have been sent."
+  } catch (error) {
+    return toErrorMessage(error)
   }
 }
 
