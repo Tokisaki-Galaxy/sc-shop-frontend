@@ -176,6 +176,8 @@ const loginWithOAuthProvider = async (provider: OAuthProvider) => {
     return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
   }
 
+  // Keep OAuth callback URI stable and country-code agnostic.
+  // Do NOT include locale/country segments here, or provider redirect URI checks can fail.
   const callbackPath = `/account/oauth/${provider}/callback`
   const callbackUrl = `${baseUrl}${callbackPath}`
 
@@ -223,12 +225,7 @@ export async function loginWithGithub(
 
 export async function handleOAuthCallback(
   provider: OAuthProvider,
-  callbackParams: {
-    code?: string
-    state?: string
-    error?: string
-    error_description?: string
-  }
+  callbackParams: Record<string, string>
 ) {
   const callbackError = callbackParams.error_description || callbackParams.error
 
@@ -242,8 +239,7 @@ export async function handleOAuthCallback(
 
   try {
     const token = await sdk.auth.callback("customer", provider, {
-      code: callbackParams.code,
-      ...(callbackParams.state ? { state: callbackParams.state } : {}),
+      ...callbackParams,
     })
 
     await setAuthToken(token)
