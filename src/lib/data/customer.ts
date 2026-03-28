@@ -17,8 +17,31 @@ import {
 } from "./cookies"
 
 const toErrorMessage = (error: unknown) => {
+  const maybeError = error as {
+    response?: {
+      data?: {
+        message?: unknown
+      } | string
+    }
+  }
+
+  const responseData = maybeError?.response?.data
+  if (typeof responseData === "string" && responseData.trim()) {
+    return responseData.trim()
+  }
+
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "message" in responseData &&
+    typeof responseData.message === "string" &&
+    responseData.message.trim()
+  ) {
+    return responseData.message.trim()
+  }
+
   if (error instanceof Error) {
-    return error.message
+    return error.message.replace(/^Error:\s*/i, "").trim()
   }
 
   return "An unexpected error occurred."
@@ -71,6 +94,11 @@ const isNextRedirectError = (error: unknown) => {
 type ResetPasswordResult = {
   success: boolean
   message: string
+}
+
+type SignupResult = {
+  success: boolean
+  message?: string
 }
 
 export const retrieveCustomer =
@@ -138,31 +166,34 @@ export async function signup(_currentState: unknown, formData: FormData) {
       ...(await getAuthHeaders()),
     }
 
-    const { customer: createdCustomer } = await sdk.store.customer.create(
+    await sdk.store.customer.create(
       customerForm,
       {},
       headers
     )
 
-    const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,
-      password,
-    })
-
-    await setAuthToken(loginToken as string)
+    await removeAuthToken()
 
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
 
-    await transferCart()
-
-    return createdCustomer
+    return {
+      success: true,
+      message: "注册成功，请去邮箱点击确认链接后再登录。",
+    } as SignupResult
   } catch (error: any) {
     if (isProviderMissingError(error)) {
-      return "Email/password sign-up is unavailable on this backend. Please use an available social sign-in option."
+      return {
+        success: false,
+        message:
+          "Email/password sign-up is unavailable on this backend. Please use an available social sign-in option.",
+      } as SignupResult
     }
 
-    return error.toString()
+    return {
+      success: false,
+      message: toErrorMessage(error),
+    } as SignupResult
   }
 }
 
@@ -183,13 +214,13 @@ export async function login(_currentState: unknown, formData: FormData) {
       return "Email/password sign-in is unavailable on this backend. Please use an available social sign-in option."
     }
 
-    return error.toString()
+    return toErrorMessage(error)
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    return toErrorMessage(error)
   }
 }
 
@@ -383,6 +414,43 @@ export async function signout(countryCode: string) {
   revalidateTag(cartCacheTag)
 
   redirect(`/${countryCode}/account`)
+}
+
+type VerifyEmailResult = {
+  success: boolean
+  message: string
+}
+
+export async function verifyEmailToken(
+  token?: string,
+  email?: string
+): Promise<VerifyEmailResult> {
+  if (!token || !email) {
+    return {
+      success: false,
+      message: "验证链接参数不完整，请检查链接后重试。",
+    }
+  }
+
+  try {
+    const result = await sdk.client.fetch<{ message?: string }>(
+      `/store/customers/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`,
+      {
+        method: "GET",
+        cache: "no-store",
+      }
+    )
+
+    return {
+      success: true,
+      message: result?.message || "邮箱验证成功，现在可以登录了。",
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: toErrorMessage(error),
+    }
+  }
 }
 
 export async function transferCart() {
