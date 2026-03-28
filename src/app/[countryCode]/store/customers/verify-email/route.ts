@@ -8,11 +8,11 @@ const DEFAULT_VERIFICATION_PATH = "/verify-email"
 
 const getVerificationPath = () => {
   const configuredPath = process.env.STOREFRONT_EMAIL_VERIFICATION_PATH?.trim()
-  const path =
-    configuredPath && configuredPath.length > 0
-      ? configuredPath
-      : DEFAULT_VERIFICATION_PATH
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+  const path = configuredPath || DEFAULT_VERIFICATION_PATH
+  const normalizedPath = (path.startsWith("/") ? path : `/${path}`).replace(
+    /\/+/g,
+    "/"
+  )
   const trimmedPath = normalizedPath.replace(/\/+$/, "")
 
   if (!trimmedPath || trimmedPath === "/") {
