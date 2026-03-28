@@ -176,6 +176,8 @@ const loginWithOAuthProvider = async (provider: OAuthProvider) => {
     return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
   }
 
+  // Keep OAuth callback URI stable and country-code agnostic.
+  // Do NOT include locale/country segments here, or provider redirect URI checks can fail.
   const callbackPath = `/account/oauth/${provider}/callback`
   const callbackUrl = `${baseUrl}${callbackPath}`
 
