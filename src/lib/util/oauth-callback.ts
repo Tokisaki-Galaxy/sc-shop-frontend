@@ -1,4 +1,4 @@
-import { OAuthProvider } from "@lib/types/auth"
+type OAuthProvider = "google" | "github"
 
 const OAUTH_CALLBACK_ALLOWED_KEYS = new Set([
   "code",
