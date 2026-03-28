@@ -1,6 +1,5 @@
 import {
   login,
-  loginWithGithub,
   loginWithGoogle,
   requestPasswordReset,
 } from "@lib/data/customer"
@@ -21,9 +20,8 @@ const Login = ({ setCurrentView }: Props) => {
 
   const [message, formAction] = useActionState(login, null)
   const [googleMessage, googleLoginAction] = useActionState(loginWithGoogle, null)
-  const [githubMessage, githubLoginAction] = useActionState(loginWithGithub, null)
   const [resetState, resetFormAction] = useActionState(requestPasswordReset, null)
-  const ssoErrors = [oauthError, googleMessage, githubMessage]
+  const ssoErrors = [oauthError, googleMessage]
     .filter(Boolean)
     .join(" | ")
 
@@ -70,16 +68,6 @@ const Login = ({ setCurrentView }: Props) => {
             variant="secondary"
           >
             Continue with Google
-          </SubmitButton>
-        </form>
-        <form action={githubLoginAction}>
-          <SubmitButton
-            type="submit"
-            data-testid="github-sso-button"
-            className="w-full"
-            variant="secondary"
-          >
-            Continue with GitHub
           </SubmitButton>
         </form>
       </div>

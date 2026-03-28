@@ -8,7 +8,7 @@ type Params = {
 }
 
 const isSupportedProvider = (provider: string): provider is OAuthProvider => {
-  return provider === "google" || provider === "github"
+  return provider === "google"
 }
 
 export async function GET(
