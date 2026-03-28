@@ -169,14 +169,21 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
-const loginWithOAuthProvider = async (provider: OAuthProvider) => {
+const loginWithOAuthProvider = async (
+  provider: OAuthProvider,
+  countryCode?: string
+) => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "")
 
   if (!baseUrl) {
     return "Missing NEXT_PUBLIC_BASE_URL. Please configure storefront base URL."
   }
 
-  const callbackUrl = `${baseUrl}/account/oauth/${provider}/callback`
+  const normalizedCountryCode = countryCode?.trim().toLowerCase()
+  const callbackPath = normalizedCountryCode
+    ? `/${normalizedCountryCode}/account/oauth/${provider}/callback`
+    : `/account/oauth/${provider}/callback`
+  const callbackUrl = `${baseUrl}${callbackPath}`
 
   try {
     const result = await sdk.auth.login("customer", provider, {
@@ -208,16 +215,18 @@ const loginWithOAuthProvider = async (provider: OAuthProvider) => {
 
 export async function loginWithGoogle(
   _currentState: unknown,
-  _formData: FormData
+  formData: FormData
 ) {
-  return loginWithOAuthProvider("google")
+  const countryCode = formData.get("country_code") as string | null
+  return loginWithOAuthProvider("google", countryCode ?? undefined)
 }
 
 export async function loginWithGithub(
   _currentState: unknown,
-  _formData: FormData
+  formData: FormData
 ) {
-  return loginWithOAuthProvider("github")
+  const countryCode = formData.get("country_code") as string | null
+  return loginWithOAuthProvider("github", countryCode ?? undefined)
 }
 
 export async function handleOAuthCallback(
