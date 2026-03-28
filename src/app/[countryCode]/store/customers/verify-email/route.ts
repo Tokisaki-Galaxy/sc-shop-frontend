@@ -8,8 +8,13 @@ const getVerificationPath = () => {
   const configuredPath = process.env.STOREFRONT_EMAIL_VERIFICATION_PATH?.trim()
   const path = configuredPath && configuredPath.length > 0 ? configuredPath : "/verify-email"
   const normalizedPath = path.startsWith("/") ? path : `/${path}`
+  const withoutTrailingSlash = normalizedPath.replace(/\/+$/, "")
 
-  return normalizedPath.replace(/\/+$/, "") || "/verify-email"
+  if (!withoutTrailingSlash || withoutTrailingSlash === "/") {
+    return "/verify-email"
+  }
+
+  return withoutTrailingSlash
 }
 
 export async function GET(
