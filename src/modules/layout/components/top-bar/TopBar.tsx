@@ -10,7 +10,7 @@ const TopBar = () => {
       <div className="content-container flex h-11 items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-5">
           <LocalizedClientLink
-            href="/account/orders"
+            href="/account"
             className="hidden sm:inline-flex items-center gap-1.5 transition-colors hover:text-slate-900"
           >
             快速复购
