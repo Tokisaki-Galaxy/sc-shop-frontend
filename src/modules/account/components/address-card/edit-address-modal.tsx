@@ -4,7 +4,6 @@ import React, { useEffect, useState, useActionState } from "react"
 import { PencilSquare as Edit, Trash } from "@medusajs/icons"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 
-import useToggleState from "@lib/hooks/use-toggle-state"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
 import Modal from "@modules/common/components/modal"
@@ -29,7 +28,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
 }) => {
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
-  const { state, open, close: closeModal } = useToggleState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [formState, formAction] = useActionState(updateCustomerAddress, {
     success: false,
@@ -39,7 +38,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
 
   const close = () => {
     setSuccessState(false)
-    closeModal()
+    setIsModalOpen(false)
   }
 
   useEffect(() => {
@@ -104,7 +103,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         <div className="flex items-center gap-x-4">
           <button
             className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
-            onClick={open}
+            onClick={() => setIsModalOpen(true)}
             data-testid="address-edit-button"
           >
             <Edit />
@@ -121,7 +120,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         </div>
       </div>
 
-      <Modal isOpen={state} close={close} data-testid="edit-address-modal">
+      <Modal isOpen={isModalOpen} close={close} data-testid="edit-address-modal">
         <Modal.Title>
           <Heading className="mb-2">Edit address</Heading>
         </Modal.Title>
