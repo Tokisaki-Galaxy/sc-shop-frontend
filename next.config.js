@@ -45,6 +45,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "github.com",
+        pathname: "/user-attachments/assets/**",
       },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [

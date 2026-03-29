@@ -1,5 +1,7 @@
-const referenceImage =
-  "https://github.com/user-attachments/assets/51adf8f8-47ae-452a-bef1-60c30215084d"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getHomepageReferenceImageURL } from "@lib/util/env"
+
+const referenceImage = getHomepageReferenceImageURL()
 
 const categories = [
   {
@@ -31,9 +33,11 @@ const categories = [
 const SliceBanner = ({
   heightClass,
   position,
+  label,
 }: {
   heightClass: string
   position: string
+  label: string
 }) => {
   return (
     <div
@@ -43,7 +47,8 @@ const SliceBanner = ({
         backgroundSize: "cover",
         backgroundPosition: position,
       }}
-      aria-label="Reference design slice"
+      role="img"
+      aria-label={label}
     />
   )
 }
@@ -95,9 +100,10 @@ const ShowcaseSections = () => {
         <SectionTitle title="Best Category" subtitle="Featured Matrix" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((item, idx) => (
-            <article
+            <LocalizedClientLink
               key={item.title}
-              className="rounded-xl border border-[#DDEFD0] bg-white/95 p-5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
+              href="/store"
+              className="block rounded-xl border border-[#DDEFD0] bg-white/95 p-5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7DBB4C] focus-visible:ring-offset-2"
             >
               <div className="mb-3 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#EAF6DF] px-3 text-xs font-semibold text-[#5D8E3D]">
                 0{idx + 1}
@@ -106,7 +112,7 @@ const ShowcaseSections = () => {
                 {item.title}
               </h3>
               <p className="text-sm text-slate-600 leading-6">{item.desc}</p>
-            </article>
+            </LocalizedClientLink>
           ))}
         </div>
       </section>
@@ -114,15 +120,43 @@ const ShowcaseSections = () => {
       <section className="content-container py-14 md:py-16 relative z-10">
         <SectionTitle title="Events & Exhibitions" subtitle="Global Presence" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SliceBanner heightClass="h-40 md:h-48" position="center 76%" />
-          <SliceBanner heightClass="h-40 md:h-48" position="center 80%" />
-          <SliceBanner heightClass="h-40 md:h-48" position="center 84%" />
+          <SliceBanner
+            heightClass="h-40 md:h-48"
+            position="center 76%"
+            label="Exhibition hall overview"
+          />
+          <SliceBanner
+            heightClass="h-40 md:h-48"
+            position="center 80%"
+            label="Trade show booth activity"
+          />
+          <SliceBanner
+            heightClass="h-40 md:h-48"
+            position="center 84%"
+            label="Product showcase at event"
+          />
         </div>
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SliceBanner heightClass="h-28 md:h-32" position="center 72%" />
-          <SliceBanner heightClass="h-28 md:h-32" position="center 78%" />
-          <SliceBanner heightClass="h-28 md:h-32" position="center 86%" />
-          <SliceBanner heightClass="h-28 md:h-32" position="center 90%" />
+          <SliceBanner
+            heightClass="h-28 md:h-32"
+            position="center 72%"
+            label="Event scene detail one"
+          />
+          <SliceBanner
+            heightClass="h-28 md:h-32"
+            position="center 78%"
+            label="Event scene detail two"
+          />
+          <SliceBanner
+            heightClass="h-28 md:h-32"
+            position="center 86%"
+            label="Event scene detail three"
+          />
+          <SliceBanner
+            heightClass="h-28 md:h-32"
+            position="center 90%"
+            label="Event scene detail four"
+          />
         </div>
       </section>
 
@@ -130,12 +164,28 @@ const ShowcaseSections = () => {
         <SectionTitle title="Certificates & Honors" subtitle="Credibility" />
         <div className="rounded-2xl border border-[#DDEFD0] bg-[#F2FAEC] p-6 md:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <SliceBanner heightClass="h-48" position="center 70%" />
-            <SliceBanner heightClass="h-48" position="center 71%" />
-            <SliceBanner heightClass="h-48" position="center 73%" />
+            <SliceBanner
+              heightClass="h-48"
+              position="center 70%"
+              label="Certificate display panel one"
+            />
+            <SliceBanner
+              heightClass="h-48"
+              position="center 71%"
+              label="Certificate display panel two"
+            />
+            <SliceBanner
+              heightClass="h-48"
+              position="center 73%"
+              label="Certificate display panel three"
+            />
           </div>
           <div className="mt-6">
-            <SliceBanner heightClass="h-44 md:h-52" position="center 66%" />
+            <SliceBanner
+              heightClass="h-44 md:h-52"
+              position="center 66%"
+              label="Quality control process overview"
+            />
           </div>
         </div>
       </section>
