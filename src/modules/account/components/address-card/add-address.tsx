@@ -4,7 +4,6 @@ import { Plus } from "@medusajs/icons"
 import { Button, Heading } from "@medusajs/ui"
 import { useEffect, useState, useActionState } from "react"
 
-import useToggleState from "@lib/hooks/use-toggle-state"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
 import Modal from "@modules/common/components/modal"
@@ -20,7 +19,7 @@ const AddAddress = ({
   addresses: HttpTypes.StoreCustomerAddress[]
 }) => {
   const [successState, setSuccessState] = useState(false)
-  const { state, open, close: closeModal } = useToggleState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [formState, formAction] = useActionState(addCustomerAddress, {
     isDefaultShipping: addresses.length === 0,
@@ -30,7 +29,7 @@ const AddAddress = ({
 
   const close = () => {
     setSuccessState(false)
-    closeModal()
+    setIsModalOpen(false)
   }
 
   useEffect(() => {
@@ -50,14 +49,14 @@ const AddAddress = ({
     <>
       <button
         className="border border-ui-border-base rounded-rounded p-5 min-h-[220px] h-full w-full flex flex-col justify-between"
-        onClick={open}
+        onClick={() => setIsModalOpen(true)}
         data-testid="add-address-button"
       >
         <span className="text-base-semi">New address</span>
         <Plus />
       </button>
 
-      <Modal isOpen={state} close={close} data-testid="add-address-modal">
+      <Modal isOpen={isModalOpen} close={close} data-testid="add-address-modal">
         <Modal.Title>
           <Heading className="mb-2">Add address</Heading>
         </Modal.Title>
