@@ -133,7 +133,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <a
-                    href="tel:8618888888888"
+                    href="tel:+8618888888888"
                     target="_blank"
                     rel="noreferrer"
                     className="hover:text-ui-fg-base"

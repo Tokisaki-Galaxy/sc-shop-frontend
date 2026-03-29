@@ -32,7 +32,7 @@ const TopBar = () => {
 
         <div className="flex items-center gap-5">
           <Link
-            href="tel:8618888888888"
+            href="tel:+8618888888888"
             className="hidden md:inline-flex items-center gap-1.5 transition-colors hover:text-slate-900"
           >
             <Phone className="h-3.5 w-3.5" />
