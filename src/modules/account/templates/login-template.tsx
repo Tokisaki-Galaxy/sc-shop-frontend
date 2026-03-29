@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import Register from "@modules/account/components/register"
@@ -16,6 +16,10 @@ const LoginTemplate = () => {
   const view = searchParams.get("view")
   const initialView = view === LOGIN_VIEW.REGISTER ? view : LOGIN_VIEW.SIGN_IN
   const [currentView, setCurrentView] = useState(initialView)
+
+  useEffect(() => {
+    setCurrentView(view === LOGIN_VIEW.REGISTER ? LOGIN_VIEW.REGISTER : LOGIN_VIEW.SIGN_IN)
+  }, [view])
 
   return (
     <div className="w-full flex justify-start px-8 py-8">

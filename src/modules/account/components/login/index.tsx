@@ -117,6 +117,7 @@ const Login = ({ setCurrentView }: Props) => {
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
         Not a member?{" "}
         <button
+          type="button"
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
           className="underline"
           data-testid="register-button"
