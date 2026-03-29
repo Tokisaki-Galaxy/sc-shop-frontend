@@ -1,5 +1,12 @@
 import { redirect } from "next/navigation"
 
-export default function CustomerServicePage() {
-  redirect("/help")
+type Props = {
+  params: Promise<{
+    countryCode: string
+  }>
+}
+
+export default async function CustomerServicePage({ params }: Props) {
+  const { countryCode } = await params
+  redirect(`/${countryCode}/help`)
 }
