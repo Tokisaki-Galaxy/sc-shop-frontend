@@ -1,30 +1,34 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getHomepageReferenceImageURL } from "@lib/util/env"
 
-const referenceImage = getHomepageReferenceImageURL()
-
 const categories = [
   {
+    key: "toner-cartridge",
     title: "Toner Cartridge",
     desc: "Laser printing consumables for office and retail scenarios.",
   },
   {
+    key: "toner-copier-kit",
     title: "Toner Copier Kit",
     desc: "OEM-similar performance with stable page yield.",
   },
   {
+    key: "inkjet-cartridges",
     title: "Inkjet Cartridges",
     desc: "High color fidelity for home and business use.",
   },
   {
+    key: "refill-bottle-ink",
     title: "Refill Bottle Ink",
     desc: "Premium refill solutions for continuous systems.",
   },
   {
+    key: "dye-sublimation-ink",
     title: "Dye & Sublimation Ink",
     desc: "Vivid color reproduction for transfer applications.",
   },
   {
+    key: "accessories-parts",
     title: "Accessories & Parts",
     desc: "Complete components for printer maintenance workflow.",
   },
@@ -39,6 +43,8 @@ const SliceBanner = ({
   position: string
   label: string
 }) => {
+  const referenceImage = getHomepageReferenceImageURL()
+
   return (
     <div
       className={`w-full rounded-xl overflow-hidden border border-[#DDEFD0] shadow-sm ${heightClass}`}
@@ -101,12 +107,12 @@ const ShowcaseSections = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((item, idx) => (
             <LocalizedClientLink
-              key={item.title}
-              href="/store"
+              key={item.key}
+              href={`/store?category=${encodeURIComponent(item.key)}`}
               className="block rounded-xl border border-[#DDEFD0] bg-white/95 p-5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7DBB4C] focus-visible:ring-offset-2"
             >
               <div className="mb-3 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#EAF6DF] px-3 text-xs font-semibold text-[#5D8E3D]">
-                0{idx + 1}
+                {String(idx + 1).padStart(2, "0")}
               </div>
               <h3 className="text-base font-semibold text-[#23323A] mb-2 leading-6">
                 {item.title}
