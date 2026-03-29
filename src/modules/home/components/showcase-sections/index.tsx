@@ -50,10 +50,12 @@ const SliceBanner = ({
       className={`w-full rounded-xl overflow-hidden border border-[#DDEFD0] shadow-sm ${heightClass}`}
       style={{
         ...(HOMEPAGE_REFERENCE_IMAGE_URL
-          ? { backgroundImage: `url(${HOMEPAGE_REFERENCE_IMAGE_URL})` }
+          ? {
+              backgroundImage: `url(${HOMEPAGE_REFERENCE_IMAGE_URL})`,
+              backgroundSize: "cover",
+              backgroundPosition: position,
+            }
           : {}),
-        backgroundSize: "cover",
-        backgroundPosition: position,
       }}
       role="img"
       aria-label={label}
