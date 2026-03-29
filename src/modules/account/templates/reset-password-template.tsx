@@ -19,7 +19,7 @@ const ResetPasswordTemplate = ({ token, email }: Props) => {
 
   if (!token) {
     return (
-      <div className="w-full flex justify-start px-8 py-8">
+      <div className="w-full flex justify-center px-8 py-8">
         <div className="max-w-sm w-full flex flex-col items-center">
           <h1 className="text-large-semi uppercase mb-6">Invalid Link</h1>
           <p className="text-center text-base-regular text-ui-fg-base mb-8">
@@ -38,7 +38,7 @@ const ResetPasswordTemplate = ({ token, email }: Props) => {
 
   if (state?.success) {
     return (
-      <div className="w-full flex justify-start px-8 py-8">
+      <div className="w-full flex justify-center px-8 py-8">
         <div className="max-w-sm w-full flex flex-col items-center">
           <h1 className="text-large-semi uppercase mb-6">Password Updated</h1>
           <p className="text-center text-base-regular text-ui-fg-base mb-8">
@@ -56,7 +56,7 @@ const ResetPasswordTemplate = ({ token, email }: Props) => {
   }
 
   return (
-    <div className="w-full flex justify-start px-8 py-8">
+    <div className="w-full flex justify-center px-8 py-8">
       <div
         className="max-w-sm w-full flex flex-col items-center"
         data-testid="reset-password-page"
