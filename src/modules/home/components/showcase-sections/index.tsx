@@ -1,8 +1,7 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const HOMEPAGE_REFERENCE_IMAGE_URL =
-  process.env.NEXT_PUBLIC_HOMEPAGE_REFERENCE_IMAGE_URL ||
-  "https://github.com/user-attachments/assets/51adf8f8-47ae-452a-bef1-60c30215084d"
+  process.env.NEXT_PUBLIC_HOMEPAGE_REFERENCE_IMAGE_URL
 
 const categories = [
   {
@@ -50,7 +49,9 @@ const SliceBanner = ({
     <div
       className={`w-full rounded-xl overflow-hidden border border-[#DDEFD0] shadow-sm ${heightClass}`}
       style={{
-        backgroundImage: `url(${HOMEPAGE_REFERENCE_IMAGE_URL})`,
+        ...(HOMEPAGE_REFERENCE_IMAGE_URL
+          ? { backgroundImage: `url(${HOMEPAGE_REFERENCE_IMAGE_URL})` }
+          : {}),
         backgroundSize: "cover",
         backgroundPosition: position,
       }}
