@@ -1,7 +1,7 @@
-<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1" y="1" width="38" height="38" rx="8" fill="#2563EB"/>
+<svg width="210" height="40" viewBox="0 0 210 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="38" height="38" rx="8" fill="#7DBB4C"/>
   <path d="M10 14.5C10 12.567 11.567 11 13.5 11H26.5C28.433 11 30 12.567 30 14.5V25.5C30 27.433 28.433 29 26.5 29H13.5C11.567 29 10 27.433 10 25.5V14.5Z" fill="white"/>
-  <rect x="14" y="15" width="12" height="4" rx="2" fill="#2563EB"/>
-  <rect x="14" y="21" width="9" height="2.5" rx="1.25" fill="#93C5FD"/>
-  <text x="50" y="25" fill="#0F172A" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="700">SC SHOP</text>
+  <rect x="14" y="15" width="12" height="4" rx="2" fill="#7DBB4C"/>
+  <rect x="14" y="21" width="9" height="2.5" rx="1.25" fill="#BEE0A4"/>
+  <text x="50" y="25" fill="#23323A" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="700">ShinColor</text>
 </svg>

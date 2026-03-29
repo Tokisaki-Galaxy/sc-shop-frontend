@@ -16,8 +16,8 @@ const MainHeader = ({ totalItems = 0 }: { totalItems?: number }) => {
             <LocalizedClientLink href="/" className="inline-flex items-center">
               <Image
                 src="/brand-logo.svg"
-                alt="SC Shop"
-                width={180}
+                alt="ShinColor"
+                width={210}
                 height={40}
                 priority
                 className="h-8 w-auto md:h-10"
