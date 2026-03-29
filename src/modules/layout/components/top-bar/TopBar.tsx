@@ -4,19 +4,27 @@ import Link from "next/link"
 import { HelpCircle, Phone, User } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
-const TopBar = () => {
+const TopBar = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
+  const reorderHref = isLoggedIn
+    ? "/account/orders?entry=reorder"
+    : "/account?view=sign-in&next=%2Faccount%2Forders%3Fentry%3Dreorder"
+
+  const trackOrderHref = isLoggedIn
+    ? "/account/orders"
+    : "/account?view=sign-in&next=%2Faccount%2Forders"
+
   return (
     <div className="bg-slate-100 border-b border-slate-200">
       <div className="content-container flex h-11 items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-5">
           <LocalizedClientLink
-            href="/account/orders?entry=reorder"
+            href={reorderHref}
             className="hidden sm:inline-flex items-center gap-1.5 transition-colors hover:text-slate-900"
           >
             快速复购
           </LocalizedClientLink>
           <LocalizedClientLink
-            href="/account/orders"
+            href={trackOrderHref}
             className="hidden sm:inline-flex items-center gap-1.5 transition-colors hover:text-slate-900"
           >
             追踪订单
