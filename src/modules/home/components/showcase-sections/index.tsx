@@ -1,8 +1,5 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
-const HOMEPAGE_REFERENCE_IMAGE_URL =
-  process.env.NEXT_PUBLIC_HOMEPAGE_REFERENCE_IMAGE_URL
-
 const categories = [
   {
     key: "toner-cartridge",
@@ -36,27 +33,35 @@ const categories = [
   },
 ]
 
-const SliceBanner = ({
+/**
+ * ShowcaseBanner component for displaying images in showcase sections
+ * @param imageUrl - Direct URL to the image (optional)
+ * @param heightClass - Tailwind height class
+ * @param label - Accessible label for the image
+ */
+const ShowcaseBanner = ({
+  imageUrl,
   heightClass,
-  position,
   label,
 }: {
+  imageUrl?: string
   heightClass: string
-  position: string
   label: string
 }) => {
   return (
     <div
-      className={`w-full rounded-xl overflow-hidden border border-[#DDEFD0] shadow-sm ${heightClass}`}
-      style={{
-        ...(HOMEPAGE_REFERENCE_IMAGE_URL
+      className={`w-full rounded-xl overflow-hidden border border-[#DDEFD0] shadow-sm ${heightClass} ${
+        imageUrl ? "" : "bg-gray-50"
+      }`}
+      style={
+        imageUrl
           ? {
-              backgroundImage: `url(${HOMEPAGE_REFERENCE_IMAGE_URL})`,
+              backgroundImage: `url(${imageUrl})`,
               backgroundSize: "cover",
-              backgroundPosition: position,
+              backgroundPosition: "center",
             }
-          : {}),
-      }}
+          : {}
+      }
       role="img"
       aria-label={label}
     />
@@ -127,78 +132,114 @@ const ShowcaseSections = () => {
         </div>
       </section>
 
-      <section className="content-container py-14 md:py-16 relative z-10">
+      {/* 
+        ========================================
+        Events & Exhibitions Section (Commented Out)
+        ========================================
+        TODO: Uncomment and configure image URLs when content is ready
+        
+        How to configure:
+        1. Upload event/exhibition images to your CDN
+        2. Replace empty imageUrl props with actual URLs
+        3. Uncomment this section
+        
+        Example:
+        <ShowcaseBanner
+          imageUrl="https://cdn.shop.tokisaki.top/events/exhibition-hall.jpg"
+          heightClass="h-40 md:h-48"
+          label="Exhibition hall overview"
+        />
+      */}
+      {/* <section className="content-container py-14 md:py-16 relative z-10">
         <SectionTitle title="Events & Exhibitions" subtitle="Global Presence" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-40 md:h-48"
-            position="center 76%"
             label="Exhibition hall overview"
           />
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-40 md:h-48"
-            position="center 80%"
             label="Trade show booth activity"
           />
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-40 md:h-48"
-            position="center 84%"
             label="Product showcase at event"
           />
         </div>
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-28 md:h-32"
-            position="center 72%"
             label="Event scene detail one"
           />
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-28 md:h-32"
-            position="center 78%"
             label="Event scene detail two"
           />
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-28 md:h-32"
-            position="center 86%"
             label="Event scene detail three"
           />
-          <SliceBanner
+          <ShowcaseBanner
+            imageUrl=""
             heightClass="h-28 md:h-32"
-            position="center 90%"
             label="Event scene detail four"
           />
         </div>
-      </section>
+      </section> */}
 
-      <section className="content-container py-14 md:py-16 relative z-10">
+      {/* 
+        ========================================
+        Certificates & Honors Section (Commented Out)
+        ========================================
+        TODO: Uncomment and configure image URLs when content is ready
+        
+        How to configure:
+        1. Upload certificate/honor images to your CDN
+        2. Replace empty imageUrl props with actual URLs
+        3. Uncomment this section
+        
+        Example:
+        <ShowcaseBanner
+          imageUrl="https://cdn.shop.tokisaki.top/certificates/iso-9001.jpg"
+          heightClass="h-48"
+          label="ISO 9001 Certificate"
+        />
+      */}
+      {/* <section className="content-container py-14 md:py-16 relative z-10">
         <SectionTitle title="Certificates & Honors" subtitle="Credibility" />
         <div className="rounded-2xl border border-[#DDEFD0] bg-[#F2FAEC] p-6 md:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <SliceBanner
+            <ShowcaseBanner
+              imageUrl=""
               heightClass="h-48"
-              position="center 70%"
               label="Certificate display panel one"
             />
-            <SliceBanner
+            <ShowcaseBanner
+              imageUrl=""
               heightClass="h-48"
-              position="center 71%"
               label="Certificate display panel two"
             />
-            <SliceBanner
+            <ShowcaseBanner
+              imageUrl=""
               heightClass="h-48"
-              position="center 73%"
               label="Certificate display panel three"
             />
           </div>
           <div className="mt-6">
-            <SliceBanner
+            <ShowcaseBanner
+              imageUrl=""
               heightClass="h-44 md:h-52"
-              position="center 66%"
               label="Quality control process overview"
             />
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }
