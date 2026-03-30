@@ -147,6 +147,7 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
+  const turnstileToken = formData.get("turnstile_token") as string
   const customerForm = {
     email: formData.get("email") as string,
     first_name: formData.get("first_name") as string,
@@ -158,6 +159,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
       password: password,
+      turnstile_token: turnstileToken,
     })
 
     await setAuthToken(token as string)
@@ -202,10 +204,11 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const turnstileToken = formData.get("turnstile_token") as string
 
   try {
     await sdk.auth
-      .login("customer", "emailpass", { email, password })
+      .login("customer", "emailpass", { email, password, turnstile_token: turnstileToken })
       .then(async (token) => {
         await setAuthToken(token as string)
         const customerCacheTag = await getCacheTag("customers")

@@ -7,7 +7,8 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
-import { useActionState } from "react"
+import Turnstile, { TurnstileRef } from "@modules/common/components/turnstile"
+import { useActionState, useState, useCallback, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 
 type Props = {
@@ -17,6 +18,9 @@ type Props = {
 const Login = ({ setCurrentView }: Props) => {
   const searchParams = useSearchParams()
   const oauthError = searchParams.get("error")
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [turnstileError, setTurnstileError] = useState(false)
+  const turnstileRef = useRef<TurnstileRef>(null)
 
   const [message, formAction] = useActionState(login, null)
   const [googleMessage, googleLoginAction] = useActionState(loginWithGoogle, null)
@@ -24,6 +28,28 @@ const Login = ({ setCurrentView }: Props) => {
   const ssoErrors = [oauthError, googleMessage]
     .filter(Boolean)
     .join(" | ")
+
+  // Reset Turnstile when form submission completes (success or failure)
+  useEffect(() => {
+    if (message !== null) {
+      setTurnstileToken(null)
+      turnstileRef.current?.reset()
+    }
+  }, [message])
+
+  const handleTurnstileVerify = useCallback((token: string) => {
+    setTurnstileToken(token)
+    setTurnstileError(false)
+  }, [])
+
+  const handleTurnstileError = useCallback(() => {
+    setTurnstileError(true)
+    setTurnstileToken(null)
+  }, [])
+
+  const handleTurnstileExpire = useCallback(() => {
+    setTurnstileToken(null)
+  }, [])
 
   return (
     <div
@@ -53,14 +79,36 @@ const Login = ({ setCurrentView }: Props) => {
             required
             data-testid="password-input"
           />
+          <input type="hidden" name="turnstile_token" value={turnstileToken || ""} />
         </div>
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="mt-4">
+            <Turnstile
+              ref={turnstileRef}
+              onVerify={handleTurnstileVerify}
+              onError={handleTurnstileError}
+              onExpire={handleTurnstileExpire}
+              size="flexible"
+            />
+          </div>
+        )}
+        {turnstileError && (
+          <ErrorMessage
+            error="验证码加载失败，请刷新页面重试"
+            data-testid="turnstile-error-message"
+          />
+        )}
         <ErrorMessage
           error={
             typeof message === "string" ? message : null
           }
           data-testid="login-error-message"
         />
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
+        <SubmitButton
+          data-testid="sign-in-button"
+          className="w-full mt-6"
+          disabled={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? !turnstileToken : false}
+        >
           Sign in
         </SubmitButton>
       </form>
