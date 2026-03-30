@@ -24,10 +24,16 @@ export default function HelpPage() {
               追踪订单
             </LocalizedClientLink>
             <a
-              href="tel:8883212552"
+              href="tel:+8618888888888"
               className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-900"
             >
-              联系电话：888-321-2552
+              联系电话：+86 188 8888 8888
+            </a>
+            <a
+              href="mailto:shincolor@vip.163.com"
+              className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-900"
+            >
+              联络邮箱：shincolor@vip.163.com
             </a>
           </div>
         </div>
