@@ -10,6 +10,8 @@ const CompanyVideo = () => {
   const [isMuted, setIsMuted] = useState(true)
 
   const videoUrl = `${FILE_S3_URL}/pages/company_introduce.mp4`
+  // Optional: add a poster image if available
+  // const posterUrl = `${FILE_S3_URL}/pages/company_video_poster.jpg`
 
   const handlePlayClick = () => {
     const video = document.getElementById(
@@ -68,7 +70,7 @@ const CompanyVideo = () => {
               playsInline
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
-              poster={`${FILE_S3_URL}/pages/company_video_poster.jpg`}
+              // poster={posterUrl} // Uncomment if you have a poster image
             >
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
