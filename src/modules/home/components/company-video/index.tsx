@@ -8,6 +8,7 @@ const FILE_S3_URL = process.env.NEXT_PUBLIC_FILE_S3_URL || ""
 const CompanyVideo = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
+  const [progress, setProgress] = useState(0)
 
   const videoUrl = `${FILE_S3_URL}/pages/company_introduce.mp4`
   // Optional: add a poster image if available
@@ -34,6 +35,28 @@ const CompanyVideo = () => {
     if (video) {
       video.muted = !isMuted
       setIsMuted(!isMuted)
+    }
+  }
+
+  const handleTimeUpdate = () => {
+    const video = document.getElementById(
+      "company-video"
+    ) as HTMLVideoElement | null
+    if (video) {
+      const progress = (video.currentTime / video.duration) * 100
+      setProgress(progress)
+    }
+  }
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const video = document.getElementById(
+      "company-video"
+    ) as HTMLVideoElement | null
+    if (video) {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const clickX = e.clientX - rect.left
+      const percentage = clickX / rect.width
+      video.currentTime = percentage * video.duration
     }
   }
 
@@ -70,6 +93,7 @@ const CompanyVideo = () => {
               playsInline
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
+              onTimeUpdate={handleTimeUpdate}
               // poster={posterUrl} // Uncomment if you have a poster image
             >
               <source src={videoUrl} type="video/mp4" />
@@ -123,6 +147,33 @@ const CompanyVideo = () => {
                     <Volume2 className="h-5 w-5 text-[#7DBB4C] md:h-6 md:w-6" />
                   )}
                 </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleProgressClick(e)
+                  }}
+                  className="group relative h-1.5 w-full cursor-pointer rounded-full bg-white/30 backdrop-blur-sm transition-all hover:h-2"
+                  role="progressbar"
+                  aria-valuenow={Math.round(progress)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Video progress"
+                >
+                  {/* Progress Fill */}
+                  <div
+                    className="absolute left-0 top-0 h-full rounded-full bg-[#7DBB4C] transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                  {/* Progress Thumb */}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ left: `${progress}%`, marginLeft: "-6px" }}
+                  />
+                </div>
               </div>
             </div>
           </div>
