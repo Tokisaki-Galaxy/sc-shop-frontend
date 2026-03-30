@@ -25,6 +25,7 @@ jobs:
           repository: tokisaki-galaxy/sc-shop-backend
           path: sc-shop-backend
           fetch-depth: 1
+
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
