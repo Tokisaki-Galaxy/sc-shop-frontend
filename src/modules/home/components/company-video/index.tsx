@@ -77,14 +77,20 @@ const CompanyVideo = () => {
             </video>
 
             {/* Video Controls Overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
-              isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
-            }`}>
+            <div 
+              className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 cursor-pointer ${
+                isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+              }`}
+              onClick={handlePlayClick}
+            >
               {/* Play/Pause Button */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <button
-                  onClick={handlePlayClick}
-                  className={`group flex h-20 w-20 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7DBB4C] focus-visible:ring-offset-2 md:h-24 md:w-24 ${
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handlePlayClick()
+                  }}
+                  className={`pointer-events-auto group flex h-20 w-20 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#7DBB4C] focus-visible:ring-offset-2 md:h-24 md:w-24 ${
                     isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
                   }`}
                   aria-label={isPlaying ? "Pause video" : "Play video"}
@@ -104,7 +110,10 @@ const CompanyVideo = () => {
               {/* Mute Toggle Button */}
               <div className="absolute bottom-6 right-6">
                 <button
-                  onClick={handleMuteToggle}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleMuteToggle()
+                  }}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7DBB4C] focus-visible:ring-offset-2 md:h-12 md:w-12"
                   aria-label={isMuted ? "Unmute video" : "Mute video"}
                 >
