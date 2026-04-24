@@ -76,6 +76,14 @@ cd nextjs-starter-medusa/
 mv .env.template .env.local
 ```
 
+### Analytics
+
+To enable Microsoft Clarity, set:
+
+```shell
+NEXT_PUBLIC_MICROSOFT_CLARITY_ID=<your-clarity-project-id>
+```
+
 ### Install dependencies
 
 Use Yarn to install all dependencies.
