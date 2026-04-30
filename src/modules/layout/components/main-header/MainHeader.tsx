@@ -1,12 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Search, ShoppingCart, X } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const MainHeader = ({ totalItems = 0 }: { totalItems?: number }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const router = useRouter()
+
+  const handleSearch = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      const formData = new FormData(e.currentTarget)
+      const query = (formData.get("q") as string)?.trim()
+      if (query) {
+        router.push(`/store?q=${encodeURIComponent(query)}`)
+      } else {
+        router.push("/store")
+      }
+    },
+    [router]
+  )
 
   return (
     <>
@@ -26,13 +42,14 @@ const MainHeader = ({ totalItems = 0 }: { totalItems?: number }) => {
           </div>
 
           <div className="hidden md:flex flex-1 max-w-4xl">
-            <form className="w-full">
+            <form className="w-full" onSubmit={handleSearch}>
               <div className="flex h-12 items-center rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div className="px-4 text-slate-400">
                   <Search className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
+                  name="q"
                   placeholder="搜索商品型号或 ID..."
                   className="flex-1 h-full text-sm text-slate-700 placeholder:text-slate-400 bg-transparent outline-none"
                   aria-label="搜索商品型号或 ID"
@@ -84,13 +101,20 @@ const MainHeader = ({ totalItems = 0 }: { totalItems?: number }) => {
             </button>
           </div>
 
-          <form className="w-full">
+          <form
+            className="w-full"
+            onSubmit={(e) => {
+              handleSearch(e)
+              setMobileSearchOpen(false)
+            }}
+          >
             <div className="flex h-12 items-center rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="px-4 text-slate-400">
                 <Search className="h-5 w-5" />
               </div>
               <input
                 type="text"
+                name="q"
                 placeholder="搜索商品型号或 ID..."
                 className="flex-1 h-full text-sm text-slate-700 placeholder:text-slate-400 bg-transparent outline-none"
                 aria-label="搜索商品型号或 ID"

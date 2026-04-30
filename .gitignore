@@ -58,3 +58,4 @@ dump.rdb
 /playwright/.auth
 sc-shop-backend/
 .agents/
+.claude/
